@@ -57,7 +57,7 @@ def app():
             st.error("Maximum area allowed is 20000 square feet")
 
         beds = st.text_input('Enter preffered number of bedrooms')
-        baths = st.text_input('Enter preffered number of bathdrooms')
+        baths = st.text_input('Enter preffered number of bathrooms')
         smoking = st.radio('Smoking allowed', ["Yes", "No"])
         wheelchair = st.radio('Wheelchair access', ["Yes", "No"])
         vehicle = st.radio('Electric vehicle charge access', ["Yes", "No"])

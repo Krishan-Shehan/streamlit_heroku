@@ -11,7 +11,7 @@ def app():
 
     item = st.sidebar.selectbox(
         'Select Item',
-        ('eggs', 'chocolate', 'cookies' , 'eggs' ,'mineral water' , 'spaghetti', 'burgers', 'grated cheese', 'frozen vegetables', 'turkey')
+        ('eggs', 'chocolate', 'cookies' ,'mineral water' , 'spaghetti', 'burgers', 'grated cheese', 'frozen vegetables', 'turkey')
         )
 
     html_temp = """
