@@ -26,17 +26,17 @@ def app():
     data = pd.read_csv("Preprocessed_data.csv")
 
     classifier_name = st.sidebar.selectbox(
-        'Select classifier',
-        ('DecisionTreeClassifier', 'RandomForestClassifier', 'KNeighborsClassifier', 'GaussianNB','MLPClassifier' ,'VotingClassifier')
+        'Select Classifier',
+        ('Decision Tree Classifier', 'Random Forest Classifier', 'K-Neighbors Classifier', 'Gaussian Naives Bayes','Neural-Network Classifier' ,'Voting Classifier')
     )
 
     def add_parameter_ui(clf_name):
         params = dict()
 
-        if clf_name == 'DecisionTreeClassifier':
+        if clf_name == 'Decision Tree Classifier':
             params['criterion'] = "gini"
             params['random_state'] = 100
-        elif clf_name == 'KNeighborsClassifier':
+        elif clf_name == 'K-Neighbors Classifier':
             # n_neighbors = st.sidebar.slider('K', 1, 20)
             params['n_neighbors'] = 3
         return params
@@ -45,50 +45,72 @@ def app():
 
     with st.sidebar.form(key='my_form'):
         budget = st.number_input('Enter your budget')
-        sqfeet = st.text_input('Enter your sqfeet')
+        if budget < 0:
+            st.error("Enter a valid budget")
+        elif budget > 3000000:
+            st.error("Maximum budget is 3000000")
+    
+        sqfeet = st.number_input('Enter your sqfeet')
+        if sqfeet < 0:
+            st.error("Enter a valid property area")
+        elif sqfeet > 20000:
+            st.error("Maximum area allowed is 20000 square feet")
+
         beds = st.text_input('Enter preffered number of bedrooms')
         baths = st.text_input('Enter preffered number of bathdrooms')
-        smoking = st.selectbox('Smoking allowed', [1, 0])
-        wheelchair = st.selectbox('Wheelchair access', [1, 0])
-        vehicle = st.selectbox('Electric vehicle charge access', [1, 0])
-        funrnished = st.selectbox('Furnished', [1, 0])
+        smoking = st.radio('Smoking allowed', ["Yes", "No"])
+        wheelchair = st.radio('Wheelchair access', ["Yes", "No"])
+        vehicle = st.radio('Electric vehicle charge access', ["Yes", "No"])
+        funrnished = st.radio('Furnished', ["Yes", "No"])
         laundry = st.selectbox('Select laundry option',
-                               ('laundry on site', 'laundry in bldg', 'w/d in unit', 'w/d hookups',
-                                'no laundry on site'))
+                               ('Laundry on site', 'Laundry in building', 'W/D in unit', 'W/D hookups',
+                                'No laundry on site'))
         parking = st.selectbox('Select parking options', (
-            'carport', 'street parking', 'attached garage', 'off-street parking', 'detached garage', 'no parking',
-            'valet parking'))
-        state = st.text_input('Enter your state')
-        # pets_allowed = st.selectbox('pets allowed', [1, 0])
-        submit = st.form_submit_button(label='Submit')
+            'Carport', 'Street parking', 'Attached garage', 'Off-street parking', 'Detached garage', 'No parking','Valet parking'))
+        state = st.text_input('Enter your state code')
+        submit = st.form_submit_button(label='Predict')
 
-    if parking == 'carport': parking = 4
-    if parking == 'street parking': parking = 1
-    if parking == 'attached garage': parking = 0
-    if parking == 'off-street parking': parking = 2
-    if parking == 'detached garage': parking = 5
-    if parking == 'no parking': parking = 3
-    if parking == 'valet parking': parking = 6
+    if parking == 'Carport': parking = 4
+    if parking == 'Street parking': parking = 1
+    if parking == 'Attached garage': parking = 0
+    if parking == 'Off-street parking': parking = 2
+    if parking == 'Detached garage': parking = 5
+    if parking == 'No parking': parking = 3
+    if parking == 'Valet parking': parking = 6
 
-    if laundry == 'laundry on site': laundry = 3
-    if laundry == 'laundry in bldg': laundry = 4
-    if laundry == 'w/d in unit': laundry = 0
-    if laundry == 'w/d hookups': laundry = 2
-    if laundry == 'no laundry on site': laundry = 1
+    if laundry == 'Laundry on site': laundry = 3
+    if laundry == 'Laundry in bldg': laundry = 4
+    if laundry == 'W/D in unit': laundry = 0
+    if laundry == 'W/D hookups': laundry = 2
+    if laundry == 'No laundry on site': laundry = 1
+
+    if smoking == 'Yes': smoking = 1
+    if smoking == 'No': smoking = 0
+
+    if wheelchair == 'Yes': wheelchair = 1
+    if wheelchair == 'No': wheelchair = 0
+
+    if vehicle == 'Yes': vehicle = 1
+    if vehicle == 'No': vehicle = 0
+
+    if funrnished == 'Yes': funrnished = 1
+    if funrnished == 'No': funrnished = 0
+
+
 
     def get_classifier(clf_name, params):
         clf = None
-        if clf_name == 'DecisionTreeClassifier':
+        if clf_name == 'Decision Tree Classifier':
             clf = DecisionTreeClassifier(criterion=params['criterion'], random_state=params['random_state'])
-        elif clf_name == 'RandomForestClassifier':
+        elif clf_name == 'Random Forest Classifier':
             clf = RandomForestClassifier()
-        elif clf_name == 'KNeighborsClassifier':
+        elif clf_name == 'K-Neighbors Classifier':
             clf = KNeighborsClassifier(n_neighbors=3)
-        elif clf_name == 'GaussianNB':
+        elif clf_name == 'Gaussian Naives Bayes':
             clf = GaussianNB()
-        elif clf_name == 'MLPClassifier':
+        elif clf_name == 'Neural-Network Classifier':
             clf = MLPClassifier()
-        elif clf_name == 'VotingClassifier':
+        elif clf_name == 'Voting Classifier':
             log_clf = LogisticRegression()
             rnd_clf = RandomForestClassifier()
             knn_clf = KNeighborsClassifier()
@@ -148,19 +170,47 @@ def app():
         y_pred3 = bianryclasification_specific(budget, sqfeet, beds, baths, smoking, wheelchair, vehicle, funrnished,
                                                laundry, parking,
                                                state)
-        if y_pred2 == 0: y_pred2 = 'townhouse'
-        if y_pred2 == 1: y_pred2 = 'condo'
-        if y_pred2 == 2: y_pred2 = 'apartment'
-        if y_pred2 == 3: y_pred2 = 'duplex'
-        if y_pred3 == 0: y_pred3 = 'Pets not allowed'
-        if y_pred3 == 1: y_pred3 = 'Pets allowed'
+        if y_pred2 == 0: y_pred2 = 'TOWN HOUSE'
+        if y_pred2 == 1: y_pred2 = 'CONDOMINIUM'
+        if y_pred2 == 2: y_pred2 = 'APARTMENT'
+        if y_pred2 == 3: y_pred2 = 'DUPLEX'
+        if y_pred3 == 0: y_pred3 = 'PETS NOT ALLOWED'
+        if y_pred3 == 1: y_pred3 = 'PETS ALLOWED'
 
-        st.write(f'Type  = {y_pred2}')
-        st.write(f'Pets allowed = {y_pred3}')
+        # st.write(f'Type  = {y_pred2}')
+        # st.write(f'Pets allowed = {y_pred3}')
+
+        # classifier = '<p style="font-family:sans-serif; color:Green; font-size: 42px; background-color: red ; height: 200px ; padding: 10px ; width: 100% ">classifier</p>' 
+        # st.markdown(classifier, unsafe_allow_html=True)
+    
+        html_temp = """
+        <div style="background-color:#0CB9A0;padding:1.5px">
+        <h1 style="font-family:Courier; color:white;text-align:center; font-size:45px">Housing Type Prediction</h1>
+        </div><br>"""
+        
+        st.markdown(html_temp,unsafe_allow_html=True)
+        st.title(f'{classifier_name}')
+        st.markdown('<style>h1{font-family:Courier; color: #1E8054;}</style>', unsafe_allow_html=True)
+
+
+        # st.header("Classifier name")
+        # st.write(f'{classifier_name}')
+
+        st.header("Type")
+        st.write(f'{y_pred2}')
+
+        st.header("Pets allowed")
+        st.write(f'{y_pred3}')
+
+        
+    
+
+    
+
 
     binary_y_pred, binary_acc = bianryclasification()
     multilabel_y_pred, multilabel_acc, Y_test = multilableclasification()
-    st.write(f'Classifier = {classifier_name}')
+    #st.write(f'Classifier = {classifier_name}')
 
 
 
